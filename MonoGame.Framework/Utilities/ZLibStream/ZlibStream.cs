@@ -2742,7 +2742,9 @@ namespace MonoGame.Utilities
             {
                 if (tree[n * 2] != 0)
                 {
-                    s.heap[++s.heap_len] = max_code = n;
+                    int hlen = ++s.heap_len;
+                    max_code = n;
+                    s.heap[hlen] = max_code;
                     s.depth[n] = 0;
                 }
                 else
@@ -2757,7 +2759,14 @@ namespace MonoGame.Utilities
             // two codes of non zero frequency.
             while (s.heap_len < 2)
             {
-                node = s.heap[++s.heap_len] = (max_code < 2 ? ++max_code : 0);
+                int mcode = 0;
+                if(max_code < 2)
+                {
+                    mcode = ++max_code;
+                }
+                int hlen = ++s.heap_len;
+                s.heap[hlen] = mcode;
+                node = mcode;
                 tree[node * 2] = 1;
                 s.depth[node] = 0;
                 s.opt_len--;
@@ -2785,12 +2794,17 @@ namespace MonoGame.Utilities
                 s.pqdownheap(tree, 1);
                 m = s.heap[1]; // m = node of next least frequency
 
-                s.heap[--s.heap_max] = n; // keep the nodes sorted by frequency
-                s.heap[--s.heap_max] = m;
+                int hmax1 = --s.heap_max;
+                int hmax2 = --s.heap_max;
+
+                s.heap[hmax1] = n; // keep the nodes sorted by frequency
+                s.heap[hmax2] = m;
 
                 // Create a new node father of n and m
                 tree[node * 2] = unchecked((short)(tree[n * 2] + tree[m * 2]));
-                s.depth[node] = (sbyte)(System.Math.Max((byte)s.depth[n], (byte)s.depth[m]) + 1);
+                byte d1 = (byte) s.depth[n];
+                byte d2 = (byte)s.depth[m];
+                s.depth[node] = (sbyte)(System.Math.Max(d1, d2) + 1);
                 tree[n * 2 + 1] = tree[m * 2 + 1] = (short)node;
 
                 // and insert the new node in the heap
@@ -3038,7 +3052,8 @@ namespace MonoGame.Utilities
                         // compute minimum size table less than or equal to l bits
                         z = g - w;
                         z = (z > l) ? l : z; // table size upper limit
-                        if ((f = 1 << (j = k - w)) > a + 1)
+                        j = k - w;
+                        if ((f = 1 << j) > a + 1)
                         {
                             // try a k-w bit table
                             // too few codes for k-w bit table
